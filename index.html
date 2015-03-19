@@ -9,7 +9,10 @@
 
         <link rel="stylesheet" href="css/bootstrap.min.css">
 		<style>
-
+			.overlay {
+				fill: none;
+				pointer-events: all;
+			}
 		</style>
 
 	    <script src="js/angular.min.js"></script>
@@ -22,10 +25,9 @@
 		<div class="container full-frame" ng-app="gdpvisualisation" ng-controller="mainCtrl">
 			<h1>GDP Evolution</h1>
 
-			<div class="svg-container">
+			<div id="svg-container">
 
 			</div>
 		</div>
     </body>
-
 </html>
