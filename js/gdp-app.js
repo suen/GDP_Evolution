@@ -66,7 +66,31 @@ function svg_init(){
 			 .style('stroke-width', 0.5);
 
 	});
-}
+};
+
+var data;
+function data_init(){
+
+	var dsv = d3.dsv(";", "text/plain");
+
+	dsv("data/normalized_with_regions_gdp.csv", function(csv){
+		data = d3.nest()
+				.key(function(d) { return d.Year; })
+				.rollup(function(d) {  
+					
+					var max = 0, country;
+					d.forEach(function(d){
+						 if ( d['GDP'] > max){
+							max = d['GDP'];
+							country = d['Country'];
+						 };
+					});
+					return {"country": country, "GDP": max};
+				})
+				.entries(csv);
+	});
+
+};
 
 function zoomed(){
 	features.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
@@ -74,4 +98,7 @@ function zoomed(){
 
 $(document).ready(function(){
 	svg_init();
+	
+	data_init();
+
 });
