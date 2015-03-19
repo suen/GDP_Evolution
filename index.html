@@ -15,21 +15,7 @@
 	    <script src="js/angular.min.js"></script>
 		<script src="js/d3.v3.min.js" charset="utf-8"></script>
 		<script src="js/jquery-1.11.2.min.js"></script>
-		<script>
-
-    var app = angular.module('gdpvisualisation', []);
-    app.controller('mainCtrl', function($scope,$http){
-
-    });
-    app.filter('range', function() {
-      return function(input, total) {
-        total = parseInt(total);
-          for (var i=0; i<total; i++)
-            input.push(i);
-            return input;
-        };
-    });
-		</script>
+		<script src="js/gdp-app.js"></script>
 
     </head>
     <body>
