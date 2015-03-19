@@ -14,13 +14,14 @@ app.filter('range', function() {
 	};
 });
 
-var margin = 75,
-	width = 1400 - margin,
-	height = 600 - margin;
+var marginSide = 150,
+	marginBottom = 70,
+	width = window.innerWidth,
+	height = window.innerHeight;
 
 var projection = d3.geo.mercator()
 					   .scale(140)
-					   .translate( [width / 2, height / 1.2]);
+					   .translate( [width / 2.5, height / 1.8]);
 var path = d3.geo.path().projection(projection);
 
 var zoom = d3.behavior.zoom()
@@ -35,8 +36,8 @@ function svg_init(){
 
 	svg = d3.select("#svg-container")
 		.append("svg")
-		.attr("width", width + margin)
-		.attr("height", height + margin)
+		.attr("width", width - 2*marginSide)
+		.attr("height", height - 2*marginBottom)
 
 	features = svg.append("g");
 

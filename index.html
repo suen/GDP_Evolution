@@ -13,6 +13,12 @@
 				fill: none;
 				pointer-events: all;
 			}
+
+			#svg-container{
+			}
+			#svg-container svg{
+				border: 1px solid #dfdfdf;
+			}
 		</style>
 
 	    <script src="js/angular.min.js"></script>
@@ -22,7 +28,7 @@
 
     </head>
     <body>
-		<div class="container full-frame" ng-app="gdpvisualisation" ng-controller="mainCtrl">
+		<div class="container-fluid" ng-app="gdpvisualisation" ng-controller="mainCtrl">
 			<h1>GDP Evolution</h1>
 
 			<div id="svg-container">
