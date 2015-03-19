@@ -1,0 +1,45 @@
+<!doctype html>
+<html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>GDP Evolution</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" href="css/bootstrap.min.css">
+		<style>
+
+		</style>
+
+	    <script src="js/angular.min.js"></script>
+		<script src="js/d3.v3.min.js" charset="utf-8"></script>
+		<script src="js/jquery-1.11.2.min.js"></script>
+		<script>
+
+    var app = angular.module('gdpvisualisation', []);
+    app.controller('mainCtrl', function($scope,$http){
+
+    });
+    app.filter('range', function() {
+      return function(input, total) {
+        total = parseInt(total);
+          for (var i=0; i<total; i++)
+            input.push(i);
+            return input;
+        };
+    });
+		</script>
+
+    </head>
+    <body>
+		<div class="container full-frame" ng-app="gdpvisualisation" ng-controller="mainCtrl">
+			<h1>GDP Evolution</h1>
+
+			<div class="svg-container">
+
+			</div>
+		</div>
+    </body>
+
+</html>
