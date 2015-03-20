@@ -48,6 +48,7 @@ function svg_init(){
 		.call(zoom);
 
 	function markCountry(d) {
+		countries.push(d.properties.name);
 		if(d.properties.name=="Belgium")
 			return "red"; 
 
@@ -64,33 +65,71 @@ function svg_init(){
 			 .style('fill', markCountry)
 			 .style('stroke', 'black')
 			 .style('stroke-width', 0.5);
-
 	});
 };
+var countries = [];
 
 var data;
 function data_init(){
 
 	var dsv = d3.dsv(";", "text/plain");
 
-	dsv("data/normalized_with_regions_gdp.csv", function(csv){
+	dsv("data/gdp_countries_filtered.csv", function(csv){
 		data = d3.nest()
 				.key(function(d) { return d.Year; })
 				.rollup(function(d) {  
 					
 					var max = 0, country;
 					d.forEach(function(d){
-						 if ( d['GDP'] > max){
-							max = d['GDP'];
+						 if ( Number.parseFloat(d['GDP']) > max){
+							max = Number.parseFloat(d['GDP']);
 							country = d['Country'];
 						 };
 					});
 					return {"country": country, "GDP": max};
 				})
 				.entries(csv);
+		animation();
 	});
 
 };
+
+function animation(){
+
+	year = 1960;
+	var interval = setInterval(function() {
+		if (year > 2013)
+		return;
+		country_highest_gdp(year++);
+
+	}, 1000);
+
+};
+
+function country_highest_gdp(year){
+
+		var country, gdp;
+
+		for (i in data){
+			if (data[i]['key'] == year.toString()) {
+				country = data[i]['values']['country'];
+				gdp = data[i]['values']['GDP'];
+			}
+		}	
+
+		console.log("Country : " + country)
+		console.log("GDP : " + gdp)
+
+		features.selectAll('path').style("fill", function(d) {
+			if(d.properties.name==country)
+				return "red"; 
+
+			return "lightBlue";
+			});
+		d3.select("#country").text(country);
+		d3.select("#year").text(year);
+		
+}
 
 function zoomed(){
 	features.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
