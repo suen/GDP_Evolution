@@ -1,7 +1,39 @@
 
-var app = angular.module('gdpvisualisation', []);
+var scope;
+var svg, features;
+var data_byregion, data_allregion;
+var raw_data;
+var data_initialized = false;
+var colors = "#51574a #447c69 #74c493 #8e8c6d #e4bf80 #e9d78e #e2975d #f19670 #e16552 #c94a53 #be5168 #a34974 #993767 #65387d #4e2472 #9163b6 #e279a3 #e0598b #7c9fb0 #5698c4 #9abf88".split(" ");
+
+var app = angular.module('gdpvisualisation', ['ngMaterial']);
 
 app.controller('mainCtrl', function($scope,$http){
+	$scope.currentyear = 1960;
+	$scope.currentregion = "All";
+
+	$scope.regions = ["All", "North America","South Asia","Sub-Saharan Africa","Europe & Central Asia","Middle East & North Africa","Latin America & Caribbean","East Asia & Pacific"];
+	
+	$scope.playpause = "Play";
+
+	$scope.play = function() {
+		
+		if ($scope.playpause == "Play"){
+			$scope.playpause = "Pause"
+			start_animation();
+		}
+		else if ($scope.playpause == "Pause"){
+			$scope.playpause = "Play"
+			stop_animation();
+		}
+
+	};
+
+	$scope.$watch("currentyear", function(nv, ov){
+		if (!data_initialized)
+			return;
+		country_highest_gdp(nv);
+	});
 
 });
 
@@ -30,7 +62,6 @@ var zoom = d3.behavior.zoom()
 			.scaleExtent([1, 8])
 			.on("zoom", zoomed);
 
-var svg, features;
 
 function svg_init(){
 
@@ -54,6 +85,17 @@ function svg_init(){
 
 		return "lightBlue";
 	}
+
+	palette_selection =	d3
+		.select("#palette-list")
+		.selectAll("li")
+		.data(colors)
+	
+	palette_selection.enter()
+		.append("li")
+		.attr("class", "palette")
+		.attr("style", function(d) { return "background-color: " + d ;  })
+		.text(function(d) { return colors.indexOf(d); });
 	
 	d3.json("data/world_countries.json", function(geo_data) {
 
@@ -68,67 +110,119 @@ function svg_init(){
 	});
 };
 var countries = [];
-
-var data;
 function data_init(){
 
 	var dsv = d3.dsv(";", "text/plain");
 
-	dsv("data/gdp_countries_filtered.csv", function(csv){
-		data = d3.nest()
-				.key(function(d) { return d.Year; })
-				.rollup(function(d) {  
-					
-					var max = 0, country;
-					d.forEach(function(d){
-						 if ( Number.parseFloat(d['GDP']) > max){
-							max = Number.parseFloat(d['GDP']);
-							country = d['Country'];
-						 };
-					});
-					return {"country": country, "GDP": max};
-				})
-				.entries(csv);
-		animation();
+	dsv("data/gdp_data.csv", function(csv){
+		raw_data = csv;
+
+		data_groupby("year");	
+
+		data_initialized = true;
+
 	});
 
 };
 
-function animation(){
+function data_groupby(attr){
+		data_byregion = d3.nest()
+				.key(function(d) { return d[attr]; })
+				.key(function(d) { return d['region']; })
+				.sortValues(function(a,b){ return Number.parseFloat(b.gdp) - Number.parseFloat(a.gdp); })
+				.entries(raw_data);
+		data_allregion = d3.nest()
+				.key(function(d) { return d[attr]; })
+				.sortValues(function(a,b){ return Number.parseFloat(b.gdp) - Number.parseFloat(a.gdp); })
+				.entries(raw_data);
+}
 
-	year = 1960;
-	var interval = setInterval(function() {
-		if (year > 2013)
-		return;
+var play_interval;
+function start_animation(){
+
+	year = scope.currentyear;
+	play_interval = setInterval(function() {
+		if (year >= 2013)
+			stop_animation();
 		country_highest_gdp(year++);
-
+		scope.$apply()
 	}, 1000);
-
 };
+
+function stop_animation(){
+	clearInterval(play_interval);
+	scope.playpause = "Play";
+}
 
 function country_highest_gdp(year){
 
-		var country, gdp;
+	var countriesTop20 = [],
+		countriesTop1020 = [], 
+		countriesTop2030 = [];
 
-		for (i in data){
-			if (data[i]['key'] == year.toString()) {
-				country = data[i]['values']['country'];
-				gdp = data[i]['values']['GDP'];
+	currentregion = scope.currentregion;
+
+//	console.log("current region : " + currentregion);
+
+	if (currentregion == "All") {
+		for (i in data_allregion){
+			if (data_allregion[i]['key'] == year.toString()) {
+				
+				if (data_allregion[i]['values'].length > 20)
+					countriesTop20 = data_allregion[i]['values'].slice(0,20);
+				else
+					countriesTop20 = data_allregion[i]['values'];
+
+			}
+		}	
+	}
+	else {
+		for (i in data_byregion){
+			if (data_byregion[i]['key'] == year.toString()) {
+				
+				regions = data_byregion[i]['values'];
+
+				for (r in regions){
+					if (regions[r]['key'] == currentregion){
+						console.log(regions[r]); 
+						
+						if (regions[r]['key'].length > 20) 
+							countriesTop20 = regions[r]['values'].slice(0,20);
+						else
+							countriesTop20 = regions[r]['values'];
+					}
+				}
 			}
 		}	
 
-		console.log("Country : " + country)
-		console.log("GDP : " + gdp)
+	}
 
-		features.selectAll('path').style("fill", function(d) {
-			if(d.properties.name==country)
-				return "red"; 
 
-			return "lightBlue";
-			});
-		d3.select("#country").text(country);
-		d3.select("#year").text(year);
-		
+	//console.log("Country : " + countriesTop10)
+
+	features.selectAll('path').style("fill", function(d) {
+
+		for (country in countriesTop20){
+			if (countriesTop20[country].country == d.properties.name){
+				return colors[country];
+			}
+		}
+		/*
+		for (country in countriesTop1020){
+			if (countriesTop1020[country].country == d.properties.name)
+				return "blue";
+		}
+		for (country in countriesTop2030){
+			if (countriesTop2030[country].country == d.properties.name)
+				return "green";
+		}
+		*/
+
+		return "white";
+		});
+	d3.select("#year").text(year);
+
+	scope.currentyear = year;
 }
 
 function zoomed(){
@@ -136,6 +230,9 @@ function zoomed(){
 }
 
 $(document).ready(function(){
+
+	scope = angular.element('[ng-controller=mainCtrl]').scope();
+
 	svg_init();
 	
 	data_init();

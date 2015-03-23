@@ -8,6 +8,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <link rel="stylesheet" href="css/bootstrap.min.css">
+		<link rel="stylesheet" href="css/angular-material.min.css">
+    <link rel="stylesheet" href="css/fontgoogle.css">
+
 		<style>
 			.overlay {
 				fill: none;
@@ -19,23 +22,61 @@
 			#svg-container svg{
 				border: 1px solid #dfdfdf;
 			}
+			.palette  {
+				display: block;
+				width: 50px; 
+				height: 20px; 
+				background-color: #000; 
+				border: 1px solid #dfdfdf;
+				text-align: center;
+			}
+
+			#palette-list {
+
+			}
+
+			#palette-list li {
+				list-style: none;
+			}
 		</style>
 
+		<script src="js/jquery-1.11.2.min.js"></script>
 	    <script src="js/angular.min.js"></script>
 		<script src="js/d3.v3.min.js" charset="utf-8"></script>
-		<script src="js/jquery-1.11.2.min.js"></script>
+    <script src="js/angular-animate.min.js"></script>
+    <script src="js/angular-aria.min.js"></script>
+    <script src="js/angular-material.min.js"></script>
 		<script src="js/gdp-app.js"></script>
 
     </head>
     <body>
 		<div class="container-fluid" ng-app="gdpvisualisation" ng-controller="mainCtrl">
-			<h1>GDP Evolution</h1>
+			<h1 style="text-align: center; margin:0px; padding:0px;">GDP Evolution</h1>
+			<p style="text-align:center;"><select ng-model="currentregion"><option ng-repeat="r in regions">{{r}}</option></select></p>
 
-			<p id="country">Country</p>
-			<p id="year">Year</p>
-			<div id="svg-container">
-
+			<h2 style="text-align: center; font-size: 2em;margin:0px; padding:0px;" id="year">{{currentyear}}</h2>
+			
+			<div class="slider-container">
+			     <md-slider flex min="1960" max="2013" ng-model="currentyear" aria-label="red" id="red-slider" class>
+				</md-slider>
 			</div>
+
+			<p style="text-align:center;"><button class="btn btn-success" ng-click="play()">{{playpause}}</button></p>
+
+			<div id="svg-container" style="float:left">
+			</div>
+
+			<div style="float: left;">
+				<ul id="palette-list">
+					<!--<li class="palette" style="background-color: #dfdfdf">-->
+					<li>
+						Ranks
+					</li>
+				</ul>
+			
+			</div>
+
+			
 		</div>
     </body>
 </html>
